@@ -202,6 +202,12 @@ class Place(MPTTModel, BaseModel, SchemalessFieldMixin):
 
 reversion.register(Place)
 
+class PlaceIdentifier(models.Model):
+    data_source = models.ForeignKey(DataSource, null=False, db_index=True)
+    identifier = models.CharField(max_length=100, primary_key=True)
+    place = models.ForeignKey(Place, related_name='identifiers', null=False, db_index=True)
+    class Meta:
+        unique_together = (('data_source', 'identifier'),)
 
 class OpeningHoursSpecification(models.Model):
     GR_BASE_URL = "http://purl.org/goodrelations/v1#"

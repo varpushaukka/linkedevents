@@ -84,6 +84,11 @@ class TprekImporter(Importer):
             obj._changed_fields.append(obj_key)
             obj._changed = True
 
+    def _ensure_identifier(self, namespace, value, obj_id=None):
+        obj, created = PlaceIdentifier.objects.get_or_create(
+            data_source_id=namespace, identifier=value, place_id=obj_id)
+        return obj
+
     @db.transaction.atomic
     def _import_unit(self, syncher, info):
         obj = syncher.get(str(info['id']))
@@ -112,7 +117,7 @@ class TprekImporter(Importer):
             'address_zip': 'postal_code',
             'address_postal_full': None,
             'email': 'email',
-            'picture_url': 'image',
+#            'picture_url': 'image',
         }
         for src_field, obj_field in field_map.items():
             if not obj_field:
@@ -155,6 +160,27 @@ class TprekImporter(Importer):
             obj.deleted = False
             obj._changed_fields.append('undeleted')
             obj._changed = True
+
+        existing_identifiers = set(
+            ((i.data_source_id, i.identifier) for i in obj.identifiers.all()))
+        new_identifiers = set()
+        for source in info['sources']:
+            namespace = source.get('source')
+            if namespace == 'visithelsinki':
+                namespace = 'matko'
+            else:
+                continue
+            value = source.get('id')
+            if not namespace or not value:
+                continue
+            new_identifiers.add((namespace, value))
+        if new_identifiers != existing_identifiers:
+            obj._changed = True
+            obj._changed_fields.append('identifiers')
+            obj.identifiers = (
+                self._ensure_identifier(*i, obj_id=obj.id) for i in new_identifiers
+            )
+            print(obj.identifiers)
 
         if obj._changed:
             if obj._created:

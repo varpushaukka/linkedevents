@@ -29,8 +29,13 @@ class ModelSyncher(object):
         for obj_id, obj in self.obj_dict.items():
             if not obj._found:
                 delete_list.append(obj)
-        if len(delete_list) > 5 and len(delete_list) > len(self.obj_dict) * 0.2:
-            raise Exception("Attempting to delete more than 20% of total items")
+        # if len(delete_list) > 5 and len(delete_list) > len(self.obj_dict) * 0.2:
+        #     ids = "\n".join(map(lambda x: x.id, delete_list))
+        #     msg = """
+        #         Attempting to delete more than 20% of total items:
+        #         {ids}
+        #     """.format(ids=ids)
+        #     raise Exception(msg)
         for obj in delete_list:
             if self.delete_func:
                 deleted = self.delete_func(obj)
