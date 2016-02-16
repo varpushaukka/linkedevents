@@ -130,6 +130,8 @@ class JSONLDRelatedField(relations.HyperlinkedRelatedField):
     def __init__(self, *args, **kwargs):
         self.related_serializer = kwargs.pop('serializer', None)
         self.hide_ld_context = kwargs.pop('hide_ld_context', False)
+        print(args)
+        print(kwargs)
         super(JSONLDRelatedField, self).__init__(*args, **kwargs)
 
     def use_pk_only_optimization(self):
@@ -139,13 +141,16 @@ class JSONLDRelatedField(relations.HyperlinkedRelatedField):
             return True
 
     def to_representation(self, obj):
+        print(self.context['request'])
         if isinstance(self.related_serializer, str):
             self.related_serializer = globals().get(self.related_serializer, None)
         if self.is_expanded():
+            print('expanded')
             return self.related_serializer(obj, hide_ld_context=self.hide_ld_context,
                                            context=self.context).data
         link = super(JSONLDRelatedField, self).to_representation(obj)
         link = urlquote_id(link)
+        print(link)
         return {
             '@id': link
         }
@@ -395,8 +400,10 @@ class LinkedEventsSerializer(TranslatedModelSerializer, MPTTModelSerializer):
                 ret['@id'] = reverse(self.view_name,
                                         kwargs={u'pk': ret['id']},
                                         request=self.context['request'])
+                print('____TRY SUCCESFUL')
             except NoReverseMatch:
                 ret['@id'] = str(ret['id'])
+                print('____TRY FAILFULL')
             ret['@id'] = urlquote_id(ret['@id'])
 
         # Context is hidden if:
@@ -745,6 +752,7 @@ class EventSerializer(LinkedEventsSerializer, GeoModelAPIView):
         return instance
 
     def to_representation(self, obj):
+        print('V1')
         ret = super(EventSerializer, self).to_representation(obj)
         if 'start_time' in ret and not obj.has_start_time:
             # Return only the date part
@@ -768,6 +776,13 @@ class EventSerializer(LinkedEventsSerializer, GeoModelAPIView):
         if request:
             if not request.user.is_authenticated():
                 del ret['publication_status']
+        # futureproof the API by wrapping the image to an array
+        print(ret['image'])
+        if ret['image']['@id']:
+            ret['images'] = [ret.pop('image')]
+        else:
+            ret['images'] = []
+            ret.pop('image')
         return ret
 
     class Meta:
@@ -781,9 +796,15 @@ class EventSerializerV0_1(EventSerializer):
 
     def to_representation(self, obj):
         ret = super(EventSerializerV0_1, self).to_representation(obj)
-        image = ret['image']
-        if image:
-            ret['image'] = image.get('url', None)
+        print('V01')
+
+        if ret['images']:
+            image = ret['images'][0]
+            if image:
+                ret['image'] = image.get('url', None)
+        else:
+            ret['image'] = None
+        ret.pop('images')
         return ret
 
 def parse_time(time_str, is_start):
