@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import django_hstore.fields
+import django.contrib.postgres.fields.hstore
 import events.models
 from django.conf import settings
 import mptt.fields
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Event',
             fields=[
-                ('custom_data', django_hstore.fields.DictionaryField(blank=True, null=True)),
+                ('custom_data', django.contrib.postgres.fields.hstore.HStoreField(null=True)),
                 ('id', models.CharField(primary_key=True, max_length=50, serialize=False)),
                 ('name', models.CharField(max_length=255, db_index=True)),
                 ('name_fi', models.CharField(null=True, max_length=255, db_index=True)),
@@ -241,7 +241,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Place',
             fields=[
-                ('custom_data', django_hstore.fields.DictionaryField(blank=True, null=True)),
+                ('custom_data', django.contrib.postgres.fields.hstore.HStoreField(null=True)),
                 ('id', models.CharField(primary_key=True, max_length=50, serialize=False)),
                 ('name', models.CharField(max_length=255, db_index=True)),
                 ('name_fi', models.CharField(null=True, max_length=255, db_index=True)),

@@ -9,6 +9,7 @@ import time
 import urllib.parse
 from datetime import datetime, timedelta
 from dateutil.parser import parse as dateutil_parse
+import reversion
 
 # django and drf
 from django.db.transaction import atomic
@@ -537,7 +538,9 @@ class LinkedEventsSerializer(TranslatedModelSerializer, MPTTModelSerializer):
         if 'id' in validated_data:
             if instance.id != validated_data['id']:
                 raise serializers.ValidationError({'id':_("You may not change the id of an existing object.")})
+
         super().update(instance, validated_data)
+
         return instance
 
 
@@ -1054,6 +1057,7 @@ class EventSerializer(LinkedEventsSerializer, GeoModelAPIView):
         return data
 
     def create(self, validated_data):
+
         # if id was not provided, we generate it upon creation:
         if 'id' not in validated_data:
             validated_data['id'] = generate_id(self.data_source)
@@ -1066,13 +1070,19 @@ class EventSerializer(LinkedEventsSerializer, GeoModelAPIView):
                                'created_time': Event.now(),  # we must specify creation time as we are setting id
                                'event_status': Event.Status.SCHEDULED,  # mark all newly created events as scheduled
                                })
-        event = super().create(validated_data)
 
-        # create and add related objects
-        for offer in offers:
-            Offer.objects.create(event=event, **offer)
-        for link in links:
-            EventLink.objects.create(event=event, **link)
+        # We need to handle revisions manually, because django-reversion
+        # borks when user=ApiKeyUser
+        with reversion.create_revision():
+            reversion.set_user(self.user)
+
+            event = super().create(validated_data)
+
+            # create and add related objects
+            for offer in offers:
+                Offer.objects.create(event=event, **offer)
+            for link in links:
+                EventLink.objects.create(event=event, **link)
 
         return event
 
@@ -1115,25 +1125,29 @@ class EventSerializer(LinkedEventsSerializer, GeoModelAPIView):
                 # if the start_time is not provided, do nothing
                 pass
 
-        # update validated fields
-        super().update(instance, validated_data)
+        # We need to handle revisions manually, because django-reversion
+        # borks when user=ApiKeyUser
+        with reversion.create_revision():
+            reversion.set_user(self.user)
+            # update validated fields
+            super().update(instance, validated_data)
 
-        # also update `has_end_time` if needed
-        if instance.end_time:
-            instance.has_end_time = True
-            instance.save()
+            # also update `has_end_time` if needed
+            if instance.end_time:
+                instance.has_end_time = True
+                instance.save()
 
-        # update offers
-        if isinstance(offers, list):
-            instance.offers.all().delete()
-            for offer in offers:
-                Offer.objects.create(event=instance, **offer)
+            # update offers
+            if isinstance(offers, list):
+                instance.offers.all().delete()
+                for offer in offers:
+                    Offer.objects.create(event=instance, **offer)
 
-        # update ext links
-        if isinstance(links, list):
-            instance.external_links.all().delete()
-            for link in links:
-                EventLink.objects.create(event=instance, **link)
+            # update ext links
+            if isinstance(links, list):
+                instance.external_links.all().delete()
+                for link in links:
+                    EventLink.objects.create(event=instance, **link)
 
         return instance
 
