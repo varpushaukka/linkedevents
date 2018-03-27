@@ -7,7 +7,7 @@
 -e git+https://github.com/City-of-Helsinki/django-helusers@v0.4.2#egg=django-helusers
 -e git+https://github.com/City-of-Helsinki/munigeo@v0.2.1#egg=django-munigeo
 astroid==1.5.3            # via pylint
-bleach==2.1
+bleach==2.1.3
 certifi==2017.7.27.1      # via requests
 chardet==3.0.4            # via requests
 click==6.7                # via pip-tools
@@ -24,7 +24,7 @@ django-leaflet==0.22.0
 django-modeltranslation==0.12.1
 django-mptt==0.8.7
 django-reversion==2.0.10
-django==1.11.10
+django==1.11.11
 djangorestframework-bulk==0.2.1
 djangorestframework-gis==0.11.2
 djangorestframework-jwt==1.11.0
