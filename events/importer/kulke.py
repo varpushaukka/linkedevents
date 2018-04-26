@@ -12,6 +12,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import IntegrityError
 
 from .base import Importer, register_importer, recur_dict
+from .yso import KEYWORDS_TO_ADD_TO_AUDIENCE
 from .util import unicodetext
 from events.models import DataSource, Event, EventAggregate, EventAggregateMember, Keyword, Organization, Place
 from events.keywords import KeywordMatcher
@@ -89,6 +90,10 @@ SPORTS = ['p965']
 GYMS = ['p8504']
 CHILDREN = ['p4354']
 MOVIES = ['p1235', 'p16327']
+YOUTH = ['p11617']
+ELDERLY = ['p2434']
+FAMILIES = ['p4363']
+
 MANUAL_CATEGORIES = {
     # urheilu
     546: SPORTS, 547: SPORTS, 431: SPORTS, 638: SPORTS,
