@@ -39,6 +39,7 @@ KEYWORDS_TO_ADD_TO_AUDIENCE = [
     'p16596',
 ]
 
+
 def get_yso_id(subject):
     return ':'.join(subject.split('/')[-2:])
 

@@ -9,7 +9,6 @@ import time
 from django.utils.html import strip_tags
 from .base import Importer, register_importer, recur_dict
 from events.models import Event, Keyword, DataSource, Organization, Place
-from .yso import KEYWORDS_TO_ADD_TO_AUDIENCE
 from pytz import timezone
 import pytz
 import bleach

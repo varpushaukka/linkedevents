@@ -12,7 +12,6 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import IntegrityError
 
 from .base import Importer, register_importer, recur_dict
-from .yso import KEYWORDS_TO_ADD_TO_AUDIENCE
 from .util import unicodetext
 from events.models import DataSource, Event, EventAggregate, EventAggregateMember, Keyword, Organization, Place
 from events.keywords import KeywordMatcher
