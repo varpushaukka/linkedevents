@@ -1419,11 +1419,7 @@ class EventSerializerV0_1(EventSerializer):
         return ret
 
 
-class LinkedEventsOrderingFilter(filters.OrderingFilter):
-    ordering_param = 'sort'
-
-
-class EventOrderingFilter(LinkedEventsOrderingFilter):
+class EventOrderingFilter(filters.OrderingFilter):
     def filter_queryset(self, request, queryset, view):
         queryset = super(EventOrderingFilter, self).filter_queryset(request, queryset, view)
         ordering = self.get_ordering(request, queryset, view)
