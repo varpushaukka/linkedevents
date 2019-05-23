@@ -1,7 +1,7 @@
 version: '3'
 services:
     elastic:
-        build: ./docker/elasticsearch/
+        image: helsinki/elasticsearch
         ports:
             - "9200:9200"
         container_name: linkedevents-elasticsearch
